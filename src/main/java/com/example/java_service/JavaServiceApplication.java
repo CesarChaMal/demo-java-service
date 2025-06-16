@@ -24,8 +24,8 @@ public class JavaServiceApplication {
         SpringApplication.run(JavaServiceApplication.class, args);
     }
 
-    @PostMapping("/calculate")
-    public Map<String, Object> calculate(@RequestBody Map<String, Integer> payload) {
+    @PostMapping("/calculate_python")
+    public Map<String, Object> calculateWithPython(@RequestBody Map<String, Integer> payload) {
         List<ServiceInstance> instances = discoveryClient.getInstances("python-service");
         if (instances == null || instances.isEmpty()) {
             throw new IllegalStateException("Python service not available");
@@ -36,4 +36,17 @@ public class JavaServiceApplication {
         RestTemplate restTemplate = new RestTemplate();
         return restTemplate.postForObject(pythonServiceUrl, payload, Map.class);
     }
+
+    @PostMapping("/calculate_node")
+    public Map<String, Object> calculateWithNode(@RequestBody Map<String, Integer> payload) {
+        List<ServiceInstance> instances = discoveryClient.getInstances("node-service");
+        if (instances == null || instances.isEmpty()) {
+            throw new IllegalStateException("Node service not available");
+        }
+        ServiceInstance serviceInstance = instances.get(1);
+        String nodeServiceUrl = serviceInstance.getUri().toString() + "/process";
+
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForObject(nodeServiceUrl, payload, Map.class);
+    }    
 }
